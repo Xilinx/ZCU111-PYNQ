@@ -500,7 +500,7 @@ static inline void IicWriteData(int XIicDevFile, unsigned char command,
 	ioctl(XIicDevFile,I2C_SMBUS,&args);
 }
 
-static void Lmx2594Updatei2c(int XIicDevFile,unsigned int  r[LMX2594_A_count])
+void Lmx2594Updatei2c(int XIicDevFile,unsigned int  r[LMX2594_A_count])
 {
 	int Index=0;
 	int val;
