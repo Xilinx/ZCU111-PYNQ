@@ -107,14 +107,26 @@ def _unpack_value(typename, value):
     else:
         return value[0] # Scalar
 
-def _create_c_property(name, typename, readonly):
+# The underlying C functions for generic behaviour (applies to both DAC
+# and ADC blocks) expect an argument for the type of block used.
+# Other functions leave the type of block implicit. We handle this distinction
+# by bubbling up through either `_call_function` or `_call_function_implicit`
+# calls. 
+
+def _create_c_property(name, typename, readonly, implicitType=False):
     def _get(self):
         value = _ffi.new(f"{typename}*")
-        self._call_function(f"Get{name}", value)
+        if not implicitType:
+            self._call_function(f"Get{name}", value)
+        else:
+            self._call_function_implicit(f"Get{name}", value)
         return _unpack_value(typename, value)
 
     def _set(self, value):
-        self._call_function(f"Set{name}", _pack_value(typename, value))
+        if not implicitType:
+            self._call_function(f"Set{name}", _pack_value(typename, value))
+        else:
+            self._call_function_implicit(f"Set{name}", _pack_value(typename, value))
 
     if readonly:
         return property(_get)
@@ -142,18 +154,19 @@ class RFdcBlock:
 class RFdcDacBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function_implicit(name, self._index, *args)
+
 class RFdcAdcBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-    def ThresholdStickyClear(self, ThresholdToUpdate):
-        self._call_function("ThresholdStickyClear", ThresholdToUpdate)
 
-        
-class RFdcDacBlock(RFdcBlock):
-    def __init__(self, parent, index):
-        super().__init__(parent, index)
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function_implicit(name, self._index, *args)
+
+    def ThresholdStickyClear(self, ThresholdToUpdate):
+        self._call_function_implicit("ThresholdStickyClear", ThresholdToUpdate)
 
 class RFdcTile:
     def __init__(self, parent, index):
@@ -162,7 +175,10 @@ class RFdcTile:
 
     def _call_function(self, name, *args):
         return self._parent._call_function(name, self._type, self._index, *args)
-        
+
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function(name, self._index, *args)
+
     def StartUp(self):
         self._call_function("StartUp")
 
@@ -224,10 +240,10 @@ for (name, typename, readonly) in _block_props:
     setattr(RFdcBlock, name, _create_c_property(name, typename, readonly))
 
 for (name, typename, readonly) in _adc_props:
-    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly))
+    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly, implicitType=True))
 
 for (name, typename, readonly) in _dac_props:
-    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly))
+    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly, implicitType=True))
 
 for (name, typename, readonly) in _tile_props:
     setattr(RFdcTile, name, _create_c_property(name, typename, readonly))
