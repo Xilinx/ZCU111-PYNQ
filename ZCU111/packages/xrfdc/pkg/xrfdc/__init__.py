@@ -69,19 +69,19 @@ _block_props = [("BlockStatus", "XRFdc_BlockStatus", True),
                 ("MixerSettings", "XRFdc_Mixer_Settings", False),
                 ("QMCSettings", "XRFdc_QMC_Settings", False),
                 ("CoarseDelaySettings", "XRFdc_CoarseDelay_Settings", False),
-                ("NyquistZone", "u32", False)]
+                ("NyquistZone", "u32", False),
+                ("FabRdVldWords", "u32", True),
+                ("FabWrVldWords", "u32", True)]
 
 _adc_props = [("DecimationFactor", "u32", False),
               ("ThresholdClearMode", "u32", False),
               ("ThresholdSettings", "XRFdc_Threshold_Settings", False),
-              ("CalibrationMode", "u8", False),
-              ("FabRdVldWords", "u32", False)]
+              ("CalibrationMode", "u8", False)]
 
 _dac_props = [("InterpolationFactor", "u32", False),
               ("DecoderMode", "u32", False),
               ("OutputCurr", "int", True),
-              ("InvSincFIR", "u16", False),
-              ("FabWrVldWords", "u32", False)]
+              ("InvSincFIR", "u16", False)]
 
 _tile_props = [("FabClkOutDiv", "u16", False),
                ("FIFOStatus", "u8", True),
@@ -177,7 +177,10 @@ class RFdcTile:
 
     def DumpRegs(self):
         self._call_function("DumpRegs")
-    
+
+    def DynamicPLLConfig(self, source, ref_clk_freq, samp_rate):
+        self._call_function("DynamicPLLConfig", source, ref_clk_freq, samp_rate)
+
 class RFdcDacTile(RFdcTile):
     def __init__(self, *args):
         super().__init__(*args)
