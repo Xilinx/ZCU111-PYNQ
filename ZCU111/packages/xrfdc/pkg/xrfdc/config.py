@@ -92,6 +92,7 @@ _bool_dict = {
     'false': 0
 }
 
+
 def _to_value(val, dtype):
     if dtype == 'int':
         if val in _bool_dict:
@@ -102,9 +103,11 @@ def _to_value(val, dtype):
     else:
         raise ValueError(f"{dtype} is not int or double")
 
+
 def _set_configs(obj, params, config, *args):
     for c in config:
         setattr(obj, c[0], _to_value(params[c[1].format(*args)], c[2]))
+
 
 def populate_config(obj, params):
     _set_configs(obj, params, _Config)

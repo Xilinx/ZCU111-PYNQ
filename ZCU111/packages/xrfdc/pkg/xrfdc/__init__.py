@@ -93,6 +93,7 @@ _rfdc_props = [("IPStatus", "XRFdc_IPStatus", True)]
 # Next we define some helper functions for creating properties and
 # packing/unpacking Python types into C structures
 
+
 def _pack_value(typename, value):
     if isinstance(value, dict):
         c_value = _ffi.new(f"{typename}*")
@@ -100,6 +101,7 @@ def _pack_value(typename, value):
             setattr(c_value, k, v)
         value = c_value
     return value
+
 
 def _unpack_value(typename, value):
     if dir(value):
@@ -113,17 +115,18 @@ def _unpack_value(typename, value):
 # by bubbling up through either `_call_function` or `_call_function_implicit`
 # calls. 
 
-def _create_c_property(name, typename, readonly, implicitType=False):
+
+def _create_c_property(name, typename, readonly, implicit_type=False):
     def _get(self):
         value = _ffi.new(f"{typename}*")
-        if not implicitType:
+        if not implicit_type:
             self._call_function(f"Get{name}", value)
         else:
             self._call_function_implicit(f"Get{name}", value)
         return _unpack_value(typename, value)
 
     def _set(self, value):
-        if not implicitType:
+        if not implicit_type:
             self._call_function(f"Set{name}", _pack_value(typename, value))
         else:
             self._call_function_implicit(f"Set{name}", _pack_value(typename, value))
@@ -136,6 +139,7 @@ def _create_c_property(name, typename, readonly, implicitType=False):
 # Finally we can define the object hierarchy. Each element of the object
 # hierarchy has a `_call_function` method which handles adding the
 # block/tile/toplevel arguments to the list of function parameters.
+
 
 class RFdcBlock:
     def __init__(self, parent, index):
@@ -151,12 +155,14 @@ class RFdcBlock:
     def UpdateEvent(self, Event):
         self._call_function("UpdateEvent", Event)
 
+
 class RFdcDacBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def _call_function_implicit(self, name, *args):
         return self._parent._call_function_implicit(name, self._index, *args)
+
 
 class RFdcAdcBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
@@ -167,6 +173,7 @@ class RFdcAdcBlock(RFdcBlock):
 
     def ThresholdStickyClear(self, ThresholdToUpdate):
         self._call_function_implicit("ThresholdStickyClear", ThresholdToUpdate)
+
 
 class RFdcTile:
     def __init__(self, parent, index):
@@ -197,11 +204,13 @@ class RFdcTile:
     def DynamicPLLConfig(self, source, ref_clk_freq, samp_rate):
         self._call_function("DynamicPLLConfig", source, ref_clk_freq, samp_rate)
 
+
 class RFdcDacTile(RFdcTile):
     def __init__(self, *args):
         super().__init__(*args)
         self._type = _lib.XRFDC_DAC_TILE
         self.blocks = [RFdcDacBlock(self, i) for i in range(4)]
+
 
 class RFdcAdcTile(RFdcTile):
     def __init__(self, *args):
@@ -212,9 +221,9 @@ class RFdcAdcTile(RFdcTile):
 
 class RFdc(pynq.DefaultIP):
     bindto = ["xilinx.com:ip:usp_rf_data_converter:2.0"]
+
     def __init__(self, description):
         super().__init__(description)
-        #time.wait(1)
         if 'parameters' in description:
             from .config import populate_config
             self._config = _ffi.new('XRFdc_Config*')
@@ -222,7 +231,7 @@ class RFdc(pynq.DefaultIP):
             pass
         else:
             warnings.warn("Please use an hwh file with the RFSoC driver"
-                    " - the default configuration is being used")
+                          " - the default configuration is being used")
             self._config = _lib.XRFdc_LookupConfig(0)
         self._instance = _ffi.new("XRFdc*")
         self._config.BaseAddr = self.mmio.array.ctypes.data
@@ -240,10 +249,10 @@ for (name, typename, readonly) in _block_props:
     setattr(RFdcBlock, name, _create_c_property(name, typename, readonly))
 
 for (name, typename, readonly) in _adc_props:
-    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly, implicitType=True))
+    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly, implicit_type=True))
 
 for (name, typename, readonly) in _dac_props:
-    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly, implicitType=True))
+    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly, implicit_type=True))
 
 for (name, typename, readonly) in _tile_props:
     setattr(RFdcTile, name, _create_c_property(name, typename, readonly))
