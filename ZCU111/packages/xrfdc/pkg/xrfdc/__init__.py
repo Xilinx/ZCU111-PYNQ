@@ -69,19 +69,19 @@ _block_props = [("BlockStatus", "XRFdc_BlockStatus", True),
                 ("MixerSettings", "XRFdc_Mixer_Settings", False),
                 ("QMCSettings", "XRFdc_QMC_Settings", False),
                 ("CoarseDelaySettings", "XRFdc_CoarseDelay_Settings", False),
-                ("NyquistZone", "u32", False)]
+                ("NyquistZone", "u32", False),
+                ("FabRdVldWords", "u32", True),
+                ("FabWrVldWords", "u32", True)]
 
 _adc_props = [("DecimationFactor", "u32", False),
               ("ThresholdClearMode", "u32", False),
               ("ThresholdSettings", "XRFdc_Threshold_Settings", False),
-              ("CalibrationMode", "u8", False),
-              ("FabRdVldWords", "u32", False)]
+              ("CalibrationMode", "u8", False)]
 
 _dac_props = [("InterpolationFactor", "u32", False),
               ("DecoderMode", "u32", False),
               ("OutputCurr", "int", True),
-              ("InvSincFIR", "u16", False),
-              ("FabWrVldWords", "u32", False)]
+              ("InvSincFIR", "u16", False)]
 
 _tile_props = [("FabClkOutDiv", "u16", False),
                ("FIFOStatus", "u8", True),
@@ -93,6 +93,7 @@ _rfdc_props = [("IPStatus", "XRFdc_IPStatus", True)]
 # Next we define some helper functions for creating properties and
 # packing/unpacking Python types into C structures
 
+
 def _pack_value(typename, value):
     if isinstance(value, dict):
         c_value = _ffi.new(f"{typename}*")
@@ -101,20 +102,34 @@ def _pack_value(typename, value):
         value = c_value
     return value
 
+
 def _unpack_value(typename, value):
     if dir(value):
         return {k: getattr(value, k) for k in dir(value)} # Struct
     else:
         return value[0] # Scalar
 
-def _create_c_property(name, typename, readonly):
+# The underlying C functions for generic behaviour (applies to both DAC
+# and ADC blocks) expect an argument for the type of block used.
+# Other functions leave the type of block implicit. We handle this distinction
+# by bubbling up through either `_call_function` or `_call_function_implicit`
+# calls. 
+
+
+def _create_c_property(name, typename, readonly, implicit_type=False):
     def _get(self):
         value = _ffi.new(f"{typename}*")
-        self._call_function(f"Get{name}", value)
+        if not implicit_type:
+            self._call_function(f"Get{name}", value)
+        else:
+            self._call_function_implicit(f"Get{name}", value)
         return _unpack_value(typename, value)
 
     def _set(self, value):
-        self._call_function(f"Set{name}", _pack_value(typename, value))
+        if not implicit_type:
+            self._call_function(f"Set{name}", _pack_value(typename, value))
+        else:
+            self._call_function_implicit(f"Set{name}", _pack_value(typename, value))
 
     if readonly:
         return property(_get)
@@ -124,6 +139,7 @@ def _create_c_property(name, typename, readonly):
 # Finally we can define the object hierarchy. Each element of the object
 # hierarchy has a `_call_function` method which handles adding the
 # block/tile/toplevel arguments to the list of function parameters.
+
 
 class RFdcBlock:
     def __init__(self, parent, index):
@@ -139,21 +155,25 @@ class RFdcBlock:
     def UpdateEvent(self, Event):
         self._call_function("UpdateEvent", Event)
 
+
 class RFdcDacBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function_implicit(name, self._index, *args)
+
+
 class RFdcAdcBlock(RFdcBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-    def ThresholdStickyClear(self, ThresholdToUpdate):
-        self._call_function("ThresholdStickyClear", ThresholdToUpdate)
 
-        
-class RFdcDacBlock(RFdcBlock):
-    def __init__(self, parent, index):
-        super().__init__(parent, index)
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function_implicit(name, self._index, *args)
+
+    def ThresholdStickyClear(self, ThresholdToUpdate):
+        self._call_function_implicit("ThresholdStickyClear", ThresholdToUpdate)
+
 
 class RFdcTile:
     def __init__(self, parent, index):
@@ -162,7 +182,10 @@ class RFdcTile:
 
     def _call_function(self, name, *args):
         return self._parent._call_function(name, self._type, self._index, *args)
-        
+
+    def _call_function_implicit(self, name, *args):
+        return self._parent._call_function(name, self._index, *args)
+
     def StartUp(self):
         self._call_function("StartUp")
 
@@ -177,12 +200,17 @@ class RFdcTile:
 
     def DumpRegs(self):
         self._call_function("DumpRegs")
-    
+
+    def DynamicPLLConfig(self, source, ref_clk_freq, samp_rate):
+        self._call_function("DynamicPLLConfig", source, ref_clk_freq, samp_rate)
+
+
 class RFdcDacTile(RFdcTile):
     def __init__(self, *args):
         super().__init__(*args)
         self._type = _lib.XRFDC_DAC_TILE
         self.blocks = [RFdcDacBlock(self, i) for i in range(4)]
+
 
 class RFdcAdcTile(RFdcTile):
     def __init__(self, *args):
@@ -193,9 +221,9 @@ class RFdcAdcTile(RFdcTile):
 
 class RFdc(pynq.DefaultIP):
     bindto = ["xilinx.com:ip:usp_rf_data_converter:2.0"]
+
     def __init__(self, description):
         super().__init__(description)
-        #time.wait(1)
         if 'parameters' in description:
             from .config import populate_config
             self._config = _ffi.new('XRFdc_Config*')
@@ -203,7 +231,7 @@ class RFdc(pynq.DefaultIP):
             pass
         else:
             warnings.warn("Please use an hwh file with the RFSoC driver"
-                    " - the default configuration is being used")
+                          " - the default configuration is being used")
             self._config = _lib.XRFdc_LookupConfig(0)
         self._instance = _ffi.new("XRFdc*")
         self._config.BaseAddr = self.mmio.array.ctypes.data
@@ -221,10 +249,10 @@ for (name, typename, readonly) in _block_props:
     setattr(RFdcBlock, name, _create_c_property(name, typename, readonly))
 
 for (name, typename, readonly) in _adc_props:
-    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly))
+    setattr(RFdcAdcBlock, name, _create_c_property(name, typename, readonly, implicit_type=True))
 
 for (name, typename, readonly) in _dac_props:
-    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly))
+    setattr(RFdcDacBlock, name, _create_c_property(name, typename, readonly, implicit_type=True))
 
 for (name, typename, readonly) in _tile_props:
     setattr(RFdcTile, name, _create_c_property(name, typename, readonly))
