@@ -19,4 +19,4 @@ install:
 	pip3 install .
 
 $(EMBEDDEDSW_DIR):
-	git clone https://github.com/Xilinx/embeddedsw -b release-2018.2 $(EMBEDDEDSW_DIR)
+	git clone https://github.com/Xilinx/embeddedsw -b release-2018.3 $(EMBEDDEDSW_DIR)
