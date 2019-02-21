@@ -44,7 +44,8 @@ _DAC_DDP = [
     ('DataWidth', 'C_DAC_Data_Width{}{}', 'int'),
     ('InterploationMode', 'C_DAC_Interpolation_Mode{}{}', 'int'),
     ('FifoEnable', 'C_DAC_Fifo{}{}_Enable', 'int'),
-    ('AdderEnable', 'C_DAC_Adder{}{}_Enable', 'int')
+    ('AdderEnable', 'C_DAC_Adder{}{}_Enable', 'int'),
+    ('MixerType', 'C_DAC_Mixer_Type{}{}', 'int')
 ]
 
 _ADC_ADP = [
@@ -56,7 +57,8 @@ _ADC_DDP = [
     ('DataType', 'C_ADC_Data_Type{}{}', 'int'),
     ('DataWidth', 'C_ADC_Data_Width{}{}', 'int'),
     ('DecimationMode', 'C_ADC_Decimation_Mode{}{}', 'int'),
-    ('FifoEnable', 'C_ADC_Fifo{}{}_Enable', 'int')
+    ('FifoEnable', 'C_ADC_Fifo{}{}_Enable', 'int'),
+    ('MixerType', 'C_ADC_Mixer_Type{}{}', 'int')
 ]
 
 _DAC_Tile = [
@@ -66,7 +68,9 @@ _DAC_Tile = [
     ('RefClkFreq', 'C_DAC{}_Refclk_Freq', 'double'),
     ('FabClkFreq', 'C_DAC{}_Fabric_Freq', 'double'),
     ('FeedbackDiv', 'C_DAC{}_FBDIV', 'int'),
-    ('OutputDiv', 'C_DAC{}_OutDiv', 'int')
+    ('OutputDiv', 'C_DAC{}_OutDiv', 'int'),
+    ('RefClkDiv', 'C_DAC{}_Refclk_Div', 'int'),
+    ('MultibandConfig', 'C_DAC{}_Band', 'int')
 ]
 
 _ADC_Tile = [
@@ -76,7 +80,9 @@ _ADC_Tile = [
     ('RefClkFreq', 'C_ADC{}_Refclk_Freq', 'double'),
     ('FabClkFreq', 'C_ADC{}_Fabric_Freq', 'double'),
     ('FeedbackDiv', 'C_ADC{}_FBDIV', 'int'),
-    ('OutputDiv', 'C_ADC{}_OutDiv', 'int')
+    ('OutputDiv', 'C_ADC{}_OutDiv', 'int'),
+    ('RefClkDiv', 'C_ADC{}_Refclk_Div', 'int'),
+    ('MultibandConfig', 'C_ADC{}_Band', 'int')
 ]
 
 _Config = [
