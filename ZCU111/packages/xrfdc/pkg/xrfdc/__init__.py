@@ -220,7 +220,7 @@ class RFdcAdcTile(RFdcTile):
 
 
 class RFdc(pynq.DefaultIP):
-    bindto = ["xilinx.com:ip:usp_rf_data_converter:2.0"]
+    bindto = ["xilinx.com:ip:usp_rf_data_converter:2.1"]
 
     def __init__(self, description):
         super().__init__(description)
@@ -260,11 +260,6 @@ for (name, typename, readonly) in _tile_props:
 for (name, typename, readonly) in _rfdc_props:
     setattr(RFdc, name, _create_c_property(name, typename, readonly))
 
-
 # Some of our more important #define constants
-
-XRF_DC_FINE_MIXER_MOD_COMPLX_TO_REAL = 0x2
-XRF_DC_COARSE_MIX_SAMPLE_FREQ_BY_TWO = 0x2
-XRF_DC_COARSE_MIX_MODE_C2C_C2R = 0x1
 XRF_CLK_SRC_PLL = 0x1
 XRF_CLK_SRC_EXT = 0x2
