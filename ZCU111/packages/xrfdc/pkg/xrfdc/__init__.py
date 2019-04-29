@@ -36,6 +36,7 @@ import cffi
 import os
 import pynq
 import warnings
+from wurlitzer import sys_pipes
 
 _THIS_DIR = os.path.dirname(__file__)
 
@@ -53,10 +54,11 @@ _lib = _ffi.dlopen(os.path.join(_THIS_DIR, 'libxrfdc.so'))
 # fails.
 
 def _safe_wrapper(name, *args, **kwargs):
-    if not hasattr(_lib, name):
-        raise RuntimeError(f"Function {name} not in library")
-    if getattr(_lib, name)(*args, **kwargs):
-        raise RuntimeError(f"Function {name} call failed")
+    with sys_pipes():
+        if not hasattr(_lib, name):
+            raise RuntimeError(f"Function {name} not in library")
+        if getattr(_lib, name)(*args, **kwargs):
+            raise RuntimeError(f"Function {name} call failed")
 
 
 # To reduce the amount of typing we define the properties we want for each
@@ -93,6 +95,20 @@ _rfdc_props = [("IPStatus", "XRFdc_IPStatus", True)]
 # Next we define some helper functions for creating properties and
 # packing/unpacking Python types into C structures
 
+class PropertyDict(dict):
+    """Subclass of dict to support update callbacks to C driver"""
+    def __init__(self, *args, **kwargs):
+        self.callback = lambda _:0
+        self.update(*args, **kwargs)
+
+    def set_callback(self, callback):
+        """Set the callback function triggered on __setitem__""" 
+        self.callback = callback
+
+    def __setitem__(self, key, val):
+        dict.__setitem__(self, key, val)
+        self.callback(self)
+
 
 def _pack_value(typename, value):
     if isinstance(value, dict):
@@ -105,7 +121,7 @@ def _pack_value(typename, value):
 
 def _unpack_value(typename, value):
     if dir(value):
-        return {k: getattr(value, k) for k in dir(value)} # Struct
+        return PropertyDict({k: getattr(value, k) for k in dir(value)}) # Struct
     else:
         return value[0] # Scalar
 
@@ -119,11 +135,14 @@ def _unpack_value(typename, value):
 def _create_c_property(name, typename, readonly, implicit_type=False):
     def _get(self):
         value = _ffi.new(f"{typename}*")
-        if not implicit_type:
-            self._call_function(f"Get{name}", value)
-        else:
-            self._call_function_implicit(f"Get{name}", value)
-        return _unpack_value(typename, value)
+        c_func = self._call_function if not implicit_type else \
+                 self._call_function_implicit
+        c_func(f"Get{name}", value)
+        value = _unpack_value(typename, value)
+        if isinstance(value, PropertyDict):
+            value.set_callback(lambda value: c_func(
+                f"Set{name}", _pack_value(typename, value)))
+        return value
 
     def _set(self, value):
         if not implicit_type:
