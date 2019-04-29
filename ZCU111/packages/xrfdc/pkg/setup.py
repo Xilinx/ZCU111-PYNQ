@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name = "xrfdc",
-   version = '0.1',
+   version = '0.2',
    url = 'https://github.com/Xilinx/ZCU111-PYNQ/tree/master/ZCU111/packages/xrfdc',
    license = 'All rights reserved.',
    author = "Craig Ramsay",
@@ -13,6 +13,7 @@ setup(
    },
    install_requires=[
        'pynq',
+       'wurlitzer',
    ],
    description = "Driver for the RFSoC RF Data Converter IP"
 )

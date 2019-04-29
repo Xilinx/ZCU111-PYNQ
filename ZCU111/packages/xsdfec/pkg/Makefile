@@ -1,7 +1,7 @@
 EMBEDDEDSW_DIR ?= embeddedsw
 
-ESW_LIBS := rfdc scugic
-LIB_NAME := libxrfdc.so
+ESW_LIBS := sd_fec scugic
+LIB_NAME := libxsdfec.so
 
 LIB_METAL_DIR := $(EMBEDDEDSW_DIR)/ThirdParty/sw_services/libmetal/src/libmetal
 LIB_METAL_INC := $(LIB_METAL_DIR)/build-libmetal/lib/include
@@ -17,7 +17,7 @@ $(LIB_NAME): $(EMBEDDEDSW_DIR) $(LIB_METAL_INC)
 	gcc -o $(LIB_NAME) -shared -fPIC $(ESW_INC) -Isrc $(ESW_SRC) $(LOCAL_SRC) $(OS_INC) -D__BAREMETAL__ -ggdb
 
 install:
-	cp $(LIB_NAME) xrfdc/$(LIB_NAME)
+	cp $(LIB_NAME) xsdfec/$(LIB_NAME)
 	pip3 install .
 
 $(EMBEDDEDSW_DIR):
@@ -28,3 +28,4 @@ $(LIB_METAL_INC): $(EMBEDDED_DIR)
 	mkdir -p $(LIB_METAL_DIR)/build-libmetal;
 	cd $(LIB_METAL_DIR)/build-libmetal; \
 	cmake .. -DCMAKE_TOOLCHAIN_FILE=/../../../../../../../zcu111-libmetal.cmake
+
