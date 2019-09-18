@@ -96,7 +96,12 @@ typedef struct {
 	unsigned int LMX2594_A[LMX2594_A_count];
 } XClockingLmx;
 
-XClockingLmx ClockingLmx[26] = {
+union i2c_smbus_data {
+	unsigned char byte;
+	unsigned char block[XIIC_BLOCK_MAX+1];
+};
+
+XClockingLmx ClockingLmx[27] = {
 	{5120000, {7340032, 7274496, 7208960, 7143424, 7077888, 7012352, 6946816,
 	6881313, 6815744, 6750208, 6700928, 6619153, 6553600, 6488064, 6423040,
 	6359176, 6291456, 6225920, 6160384, 6094848, 6029312, 5963776, 5898240,
@@ -462,7 +467,7 @@ XClockingLmx ClockingLmx[26] = {
 	1639972, 1574682, 1507452, 1441793, 1377281, 1368136, 1255351, 1179748,
 	1114412, 1048704, 984655, 925296, 868352, 806913, 720920, 659672, 591364,
 	532480, 475314, 444418, 327880, 264771, 198210, 132352, 67592, 9372}},
-	{7340032, {7274496, 7208960, 7143424, 7077888, 7012352, 6946816, 6881313,
+	{7340032, {7340032, 7274496, 7208960, 7143424, 7077888, 7012352, 6946816, 6881313,
 	6815744, 6750208, 6700928, 6619153, 6553600, 6488064, 6423040, 6359176,
 	6291456, 6225920, 6160384, 6094848, 6029312, 5963776, 5898240, 5832704,
 	5767168, 5701632, 5636096, 5624576, 5505025, 5439488, 5381632, 5308416,
@@ -485,15 +490,15 @@ static inline void IicWriteData(int XIicDevFile, unsigned char command,
                                                    const unsigned char *values)
 {
 	struct i2c_smbus_ioctl_data args;
-	unsigned char Block[XIIC_BLOCK_MAX];
+	union i2c_smbus_data data;
 	int Index;
 	for (Index = 1; Index <= length; Index++)
-		Block[Index] = values[Index-1];
-	Block[0] = length;
+		data.block[Index] = values[Index-1];
+	data.block[0] = length;
 	args.read_write = I2C_SMBUS_WRITE;
 	args.command = command;
 	args.size = I2C_SMBUS_I2C_BLOCK;
-	args.data = &Block;
+	args.data = &data;
 	ioctl(XIicDevFile,I2C_SMBUS,&args);
 }
 
