@@ -24,7 +24,6 @@ $(EMBEDDEDSW_DIR):
 	git clone https://github.com/Xilinx/embeddedsw -b release-2018.3 $(EMBEDDEDSW_DIR)
 
 $(LIB_METAL_INC): $(EMBEDDED_DIR)
-	apt install -y libsysfs-dev
 	mkdir -p $(LIB_METAL_DIR)/build-libmetal;
 	cd $(LIB_METAL_DIR)/build-libmetal; \
 	cmake .. -DCMAKE_TOOLCHAIN_FILE=/../../../../../../../zcu111-libmetal.cmake
