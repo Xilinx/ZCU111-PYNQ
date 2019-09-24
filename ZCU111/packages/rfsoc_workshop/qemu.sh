@@ -33,20 +33,9 @@ patch --ignore-whitespace /usr/local/bin/start_pl_server.py  << 'EOF'
      sys.exit(_start_server())
 EOF
 
-# Must build statsmodels from source (deb package is too old for plotly_express)
-pip3 install --upgrade https://github.com/statsmodels/statsmodels/archive/v0.9.0.tar.gz
-
-# We let statsmodels pull in new scipy/numpy packages for build time
-# but we canrevert by uninstalling pip versions and falling back to 
-# the .deb packages
-pip3 uninstall -y numpy scipy
-
-# Freeze package versions to match v2.4 image
-pip3 install Flask==1.0.2 jupyterlab==0.35.4 six==1.11.0 Werkzeug==0.14.1
-
 # Install RFSoC overlays
 pip3 install https://github.com/Xilinx/SDFEC-PYNQ/releases/download/v1.0_$BOARD/rfsoc_sdfec-1.0-py3-none-any.whl
-pip3 install git+https://github.com/strath-sdr/rfsoc_qpsk@51b6d97e
+pip3 install git+https://github.com/strath-sdr/rfsoc_qpsk@913169d
 pip3 install https://github.com/Xilinx/DSP-PYNQ/releases/download/v1.0_$BOARD/dsp_pynq-1.0-py3-none-any.whl
 
 # Install workshop notebooks
