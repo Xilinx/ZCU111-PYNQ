@@ -8,7 +8,7 @@ LIB_METAL_INC := $(LIB_METAL_DIR)/build-libmetal/lib/include
 
 ESW_SRC := $(filter-out %_g.c, $(foreach lib, $(ESW_LIBS), $(wildcard $(EMBEDDEDSW_DIR)/XilinxProcessorIPLib/drivers/$(lib)/src/*.c)))
 ESW_INC := $(patsubst %, -I$(EMBEDDEDSW_DIR)/XilinxProcessorIPLib/drivers/%/src, $(ESW_LIBS))
-OS_INC := -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/common -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/cortexa53/64bit -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/common/gcc -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/common -I$(LIB_METAL_INC)
+OS_INC := -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/common -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/ARMv8/64bit -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/ARMv8/64bit/platform/ZynqMP -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/common/gcc -I$(EMBEDDEDSW_DIR)/lib/bsp/standalone/src/arm/common -I$(LIB_METAL_INC)
 LOCAL_SRC := $(wildcard src/*.c)
 
 all: $(LIB_NAME)
@@ -21,7 +21,7 @@ install:
 	pip3 install .
 
 $(EMBEDDEDSW_DIR):
-	git clone https://github.com/Xilinx/embeddedsw -b release-2018.3 $(EMBEDDEDSW_DIR)
+	git clone https://github.com/Xilinx/embeddedsw -b release-2020.1 $(EMBEDDEDSW_DIR)
 
 $(LIB_METAL_INC): $(EMBEDDED_DIR)
 	apt install -y libsysfs-dev
