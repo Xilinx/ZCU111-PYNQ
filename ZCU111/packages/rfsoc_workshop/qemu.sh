@@ -19,17 +19,16 @@ EOF
 
 # Patch to have RF clock init on boot
 patch --ignore-whitespace /usr/local/bin/start_pl_server.py  << 'EOF'
---- /usr/local/bin/start_pl_server.py	2019-02-21 20:28:58.537115574 +0000
-+++ start_pl_server.py	2019-04-08 22:46:17.000000000 +0000
-@@ -4,7 +4,9 @@
+--- /usr/local/bin/start_pl_server.py	2020-09-23 17:49:12.133483000 +0100
++++ start_pl_server.py	2020-09-23 17:49:12.133483000 +0100
+@@ -3,6 +3,8 @@
  import re
  import sys
-+import xrfclk
  from pynq.pl_server.server import _start_server
- 
++import xrfclk
  if __name__ == '__main__':
 +    xrfclk.set_all_ref_clks(409.6)
-     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
      sys.exit(_start_server())
 EOF
 
