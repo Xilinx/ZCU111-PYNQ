@@ -43,8 +43,8 @@ _DAC_DDP = [
     ('DataType', 'C_DAC_Data_Type{}{}', 'int'),
     ('DataWidth', 'C_DAC_Data_Width{}{}', 'int'),
     ('InterploationMode', 'C_DAC_Interpolation_Mode{}{}', 'int'),
-    ('FifoEnable', 'C_DAC_Fifo{}{}_Enable', 'int'),
-    ('AdderEnable', 'C_DAC_Adder{}{}_Enable', 'int'),
+#    ('FifoEnable', 'C_DAC_Fifo{}{}_Enable', 'int'),
+#    ('AdderEnable', 'C_DAC_Adder{}{}_Enable', 'int'),
     ('MixerType', 'C_DAC_Mixer_Type{}{}', 'int')
 ]
 
@@ -57,7 +57,7 @@ _ADC_DDP = [
     ('DataType', 'C_ADC_Data_Type{}{}', 'int'),
     ('DataWidth', 'C_ADC_Data_Width{}{}', 'int'),
     ('DecimationMode', 'C_ADC_Decimation_Mode{}{}', 'int'),
-    ('FifoEnable', 'C_ADC_Fifo{}{}_Enable', 'int'),
+#    ('FifoEnable', 'C_ADC_Fifo{}{}_Enable', 'int'),
     ('MixerType', 'C_ADC_Mixer_Type{}{}', 'int')
 ]
 
@@ -87,8 +87,8 @@ _ADC_Tile = [
 
 _Config = [
     ('ADCType', 'C_High_Speed_ADC', 'int'),
-    ('MasterADCTile', 'C_Sysref_Master', 'int'),
-    ('MasterDACTile', 'C_Sysref_Master', 'int'),
+#    ('MasterADCTile', 'C_Sysref_Master', 'int'),
+#    ('MasterDACTile', 'C_Sysref_Master', 'int'),
     ('ADCSysRefSource', 'C_Sysref_Source', 'int'),
     ('DACSysRefSource', 'C_Sysref_Source', 'int')
 ]
