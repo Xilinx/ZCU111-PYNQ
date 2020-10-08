@@ -239,7 +239,7 @@ class RFdcAdcTile(RFdcTile):
 
 
 class RFdc(pynq.DefaultIP):
-    bindto = ["xilinx.com:ip:usp_rf_data_converter:2.1"]
+    bindto = ["xilinx.com:ip:usp_rf_data_converter:2.3"]
 
     def __init__(self, description):
         super().__init__(description)
