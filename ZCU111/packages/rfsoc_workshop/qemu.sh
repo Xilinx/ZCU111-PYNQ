@@ -18,12 +18,12 @@ patch --ignore-whitespace /usr/local/lib/python3.6/dist-packages/pynq/lib/pynqmi
 EOF
 
 # Install RFSoC overlays
-pip3 install https://github.com/Xilinx/SDFEC-PYNQ/releases/download/v1.0_$BOARD/rfsoc_sdfec-1.0-py3-none-any.whl
-pip3 install git+https://github.com/strath-sdr/rfsoc_qpsk@913169d --no-deps
-pip3 install https://github.com/Xilinx/DSP-PYNQ/releases/download/v1.0_$BOARD/dsp_pynq-1.0-py3-none-any.whl
+pip3 install https://github.com/Xilinx/SDFEC-PYNQ/releases/download/v2.0_$BOARD/rfsoc_sdfec-2.0-py3-none-any.whl --no-deps
+pip3 install git+https://github.com/strath-sdr/rfsoc_qpsk@594268d --no-deps
+pip3 install https://github.com/Xilinx/DSP-PYNQ/releases/download/v2.0_$BOARD/dsp_pynq-2.0-py3-none-any.whl --no-deps
 
 # Install workshop notebooks
-git clone https://github.com/Xilinx/PYNQ_RFSOC_Workshop.git pynq_rfsoc_workshop
+git clone https://github.com/Xilinx/PYNQ_RFSOC_Workshop.git --branch image_v2.6.0 pynq_rfsoc_workshop
 make -C pynq_rfsoc_workshop install
 rm -rf pynq_rfsoc_workshop
 rm -rf "$PYNQ_JUPYTER_NOTEBOOKS/rfsoc_qpsk"
