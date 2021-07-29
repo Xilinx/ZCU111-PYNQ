@@ -27,19 +27,19 @@
 							};
 					lmk@1 {
 							compatible = "ti,lmk04208";
-							reg = <0x0>;
+							reg = <0x1>;
 							spi-max-frequency = <400000>;
 							num_bytes = <4>;
 							};
 					lmxB@2 {
 							compatible = "ti,lmx2594";
-							reg = <0x0>;
+							reg = <0x2>;
 							spi-max-frequency = <400000>;
 							num_bytes = <4>;
 							};
 					lmxA@3 {
 							compatible = "ti,lmx2594";
-							reg = <0x0>;
+							reg = <0x3>;
 							spi-max-frequency = <400000>;
 							num_bytes = <4>;
 							};
