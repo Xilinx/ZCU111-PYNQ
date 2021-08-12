@@ -14,8 +14,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <5>;
-				sc18is603@2f { /* sc18is602 - u93 */
-					compatible = "nxp,sc18is603";
+				sc18is602@2f { /* sc18is602 - u93 */
+					compatible = "nxp,sc18is602b";
 					reg = <0x2f>;
 					#address-cells = <0x1>;
 					#size-cells = <0x0>;
