@@ -1,3 +1,11 @@
+# 🚫 This repository has been archived
+
+The latest ZCU111 board files have moved to [https://github.com/Xilinx/RFSoC-PYNQ](https://github.com/Xilinx/RFSoC-PYNQ).
+
+SD card images for the ZCU111 can be found at [http://www.pynq.io/board](http://www.pynq.io/board).
+
+---------------
+
 ## PYNQ Board Repository for the Zynq UltraScale+ RFSoC ZCU111
 This repository contains source files and instructions for building PYNQ to run on the 
 [ZCU111 board](https://www.xilinx.com/products/boards-and-kits/zcu111.html).
